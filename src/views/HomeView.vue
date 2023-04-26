@@ -8,6 +8,7 @@
 
 const startScouting = async() => {
     console.log("start scouting...")
+    console.log("test")
     // kayn.Summoner.by.name("Shaco Mid").callback(function(err, summoner) {
     //     console.log(err)
     //     console.log(summoner)
