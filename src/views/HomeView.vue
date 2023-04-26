@@ -5,10 +5,13 @@
 // })
 // import { RiotAPI, PlatformId } from '@fightmegg/riot-api'
 // const riot_api = new RiotAPI(process.env.VUE_APP_RGAPI_TOKEN)
-
+import {ref} from "vue";
+import store from "@/store"
+const product_name = ref(process.env.VUE_APP_PRODUCT_NAME)
 const startScouting = async() => {
     console.log("start scouting...")
-    console.log("test")
+    console.log(store.get("token"))
+    console.log(store.get("app-path"))
     // kayn.Summoner.by.name("Shaco Mid").callback(function(err, summoner) {
     //     console.log(err)
     //     console.log(summoner)
@@ -24,8 +27,35 @@ const startScouting = async() => {
 </script>
 
 <template>
-    <h1>Test</h1>
-    <button @click="startScouting">Start Scouting</button>
+    <div class="headline">
+        <img class="headline__img"
+            :src="require('@/assets/Scout.png')">
+        <div class="headline__text">
+            {{ product_name }}
+        </div>
+    </div>
+    <button @click="startScouting">
+        Start Scouting
+    </button>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+.headline{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 1rem;
+}
+
+.headline__img{
+    width: 5rem;
+    height: 5rem;
+    padding-right: 1.5rem;
+}
+
+.headline__text{
+    font-size: 2.5rem;
+}
+
+</style>

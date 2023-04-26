@@ -1,10 +1,8 @@
-import { app, protocol, BrowserWindow, dialog, shell, Menu } from 'electron';
+import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
-import defaultMenu from 'electron-default-menu';
-
+import Store from "electron-store"
 const isDevelopment = process.env.NODE_ENV !== 'production';
-// const { updater } = require("./updater");
 
 require('@electron/remote/main').initialize();
 
@@ -12,25 +10,17 @@ require('@electron/remote/main').initialize();
 protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
+Store.initRenderer()
 
 async function createWindow() {
-
-    // Check for app updates after 3 Seconds
-    // setTimeout(updater, 1500);
-
-    // Create the browser window. 1366 768
-
     const win = new BrowserWindow({
         width: 1600,
         height: 900,
         useContentSize: true,
         autoHideMenuBar: true,
-        title: "TEST",
         frame: true,
         webPreferences: {
             sandbox: false,
-            // Use pluginOptions.nodeIntegration, leave this alone
-            // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
             nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
             contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
             enableRemoteModule: true
@@ -151,4 +141,4 @@ if (isDevelopment) {
             app.quit();
         })
     }
-};
+}
