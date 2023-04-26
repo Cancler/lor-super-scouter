@@ -1,0 +1,66 @@
+{
+    "name": "lor-super-scouter",
+    "product_name": "LoR Super Scouter",
+    "description": "Tool that allows you to super scout your current opponent showing you which decks your opponent used in his last 20 matches",
+    "version": "0.1.0",
+    "private": true,
+    "main": "background.js",
+    "author": "Eric Kanzler",
+    "repository": "https://github.com/Cancler/lor-super-scouter.git",
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint",
+        "electron:build": "vue-cli-service electron:build",
+        "electron:serve": "vue-cli-service electron:serve",
+        "release": "vue-cli-service electron:build -p onTagOrDraft"
+    },
+    "dependencies": {
+        "@electron/remote": "^2.0.9",
+        "@fightmegg/riot-api": "^0.0.9",
+        "core-js": "^3.8.3",
+        "electron-default-menu": "^1.0.2",
+        "electron-log": "^4.4.8",
+        "electron-updater": "^5.3.0",
+        "kayn": "^0.10.2",
+        "vue": "^3.2.13",
+        "vue-router": "^4.0.3",
+        "vuex": "^4.0.0",
+        "webpack-node-externals": "^3.0.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.12.16",
+        "@babel/eslint-parser": "^7.12.16",
+        "@vue/cli-plugin-babel": "~5.0.0",
+        "@vue/cli-plugin-eslint": "~5.0.0",
+        "@vue/cli-plugin-router": "~5.0.0",
+        "@vue/cli-plugin-vuex": "~5.0.0",
+        "@vue/cli-service": "~5.0.0",
+        "electron": "^13.6.9",
+        "electron-builder": "^23.6.0",
+        "electron-devtools-installer": "^3.1.0",
+        "eslint": "^7.32.0",
+        "eslint-plugin-vue": "^8.0.3",
+        "vue-cli-plugin-electron-builder": "^2.1.1"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/vue3-essential",
+            "eslint:recommended"
+        ],
+        "parserOptions": {
+            "parser": "@babel/eslint-parser"
+        },
+        "rules": {}
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead",
+        "not ie 11"
+    ]
+}
