@@ -1,16 +1,22 @@
 <script setup>
 // ##########################################################
 
-import {computed, defineProps, onMounted, ref} from 'vue';
+import {computed, defineProps, onMounted, ref} from 'vue'
 import {DeckEncoder} from 'runeterra'
 import card_json from "@/assets/cards/cards.json"
+import {RiotAPI, Platform} from "@/api"
+import store from "@/store"
 
 // ##########################################################
 
 const props = defineProps({
     match: Object,
-    puuid: String
+    player_riot_id: Object
 });
+
+// ##########################################################
+
+const riot_api = new RiotAPI(store.get("token"))
 
 // ##########################################################
 
@@ -32,9 +38,9 @@ const outcome = computed(() => {
 // # ----------------------------------------------------
 
 const player = computed(() => {
-    if(props.match){
+    if(props.match && props.player_riot_id){
         return props.match.info.players.filter((x) => {
-            return x.puuid === props.puuid
+            return x.puuid === props.player_riot_id.puuid
         })[0]
     }
 
@@ -73,6 +79,7 @@ const opponent = computed(() => {
 
     return null
 })
+const opponent_riot_id = ref(null);
 const opponent_deck_code = computed(() => {
     if(opponent.value){
         return opponent.value.deck_code;
@@ -179,8 +186,25 @@ const formatDeck = (deck_code) => {
 // ##########################################################
 
 onMounted(() => {
-    console.log(props.match)
-    console.log(card_json);
+    // console.log(props.match)
+    // console.log(card_json);
+    // console.log(opponent.value)
+    // console.log(props.match)
+    console.log(props.player_riot_id)
+    if(opponent.value){
+        riot_api.account.getByPUUID({
+            region: Platform.AMERICAS,
+            puuid: opponent.value.puuid
+        })
+            .then(account => {
+                console.log(account)
+                opponent_riot_id.value = {
+                    gameName: account.gameName,
+                    tagLine: account.tagLine,
+                    puuid: account.puuid
+                }
+            })
+    }
 })
 
 // ##########################################################
@@ -199,7 +223,7 @@ onMounted(() => {
                     Rounds: {{ match?.info.total_turn_count }}
                 </div>
             </div>
-            <div class="deck_info">
+            <div class="deck__info">
                 <div class="participant player">
                     <div class="factions">
                         <img
@@ -208,6 +232,9 @@ onMounted(() => {
                             :key="idx"
                             :src="getFactionImage(faction)"
                         >
+                    </div>
+                    <div class="name">
+                        {{ player_riot_id.gameName }} #{{ player_riot_id.tagLine }}
                     </div>
                 </div>
                 <div class="participant opponent">
@@ -218,6 +245,11 @@ onMounted(() => {
                             :key="idx"
                             :src="getFactionImage(faction)"
                         >
+                    </div>
+                    <div class="name">
+                        <div v-if="opponent_riot_id">
+                            {{ opponent_riot_id?.gameName }} #{{ opponent_riot_id?.tagLine }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -268,31 +300,37 @@ onMounted(() => {
     font-weight: bold;
 }
 
-.deck_info{
+.deck__info{
     padding: .375rem .75rem;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
 }
 
-.deck_info .participant{
+.deck__info .participant{
     display: flex;
     align-items: center;
     margin: .5rem .75rem;
     height: 3rem;
 }
 
-.deck_info .participant .factions{
+.deck__info .participant .factions{
     display: flex;
     flex-direction: row;
     gap: .35rem;
 }
-.deck_info .participant .factions .faction{
+.deck__info .participant .factions .faction{
     width: 1.5rem;
     height: 1.5rem;
 }
 
+.deck__info .participant .name {
+    font-size: .875rem;
+    font-weight: bold;
+}
+
 .participant{
     display: grid;
-
+    gap: .5rem;
+    grid-template-columns: 3rem 8rem auto;
 }
 </style>
