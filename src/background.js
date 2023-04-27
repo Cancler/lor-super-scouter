@@ -1,16 +1,23 @@
-import { app, protocol, BrowserWindow } from 'electron';
+import {app, protocol, BrowserWindow, ipcMain} from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
 import Store from "electron-store"
+import axios from "axios";
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 require('@electron/remote/main').initialize();
-
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } }
 ]);
 Store.initRenderer()
+
+ipcMain.handle('request', async (_, axios_request) => {
+    const result = await axios(axios_request)
+    console.log(result)
+    return result.data
+})
+
 
 async function createWindow() {
     const win = new BrowserWindow({
