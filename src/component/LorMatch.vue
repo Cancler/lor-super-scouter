@@ -4,19 +4,12 @@
 import {computed, defineProps, onMounted, ref} from 'vue'
 import {DeckEncoder} from 'runeterra'
 import card_json from "@/assets/cards/cards.json"
-import {RiotAPI, Platform} from "@/api"
-import store from "@/store"
 
 // ##########################################################
 
 const props = defineProps({
-    match: Object,
-    player_riot_id: Object
+    match: Object
 });
-
-// ##########################################################
-
-const riot_api = new RiotAPI(store.get("token"))
 
 // ##########################################################
 
@@ -38,10 +31,8 @@ const outcome = computed(() => {
 // # ----------------------------------------------------
 
 const player = computed(() => {
-    if(props.match && props.player_riot_id){
-        return props.match.info.players.filter((x) => {
-            return x.puuid === props.player_riot_id.puuid
-        })[0]
+    if(props.match){
+        return props.match.info.players[0]
     }
 
     return null
@@ -79,7 +70,6 @@ const opponent = computed(() => {
 
     return null
 })
-const opponent_riot_id = ref(null);
 const opponent_deck_code = computed(() => {
     if(opponent.value){
         return opponent.value.deck_code;
@@ -118,6 +108,50 @@ const getFactionImage = (faction) => {
         return require("@/assets/Runeterra.png")
     }
 }
+const formatCard = (card_raw) => {
+    const card_json_raw = card_json.find((x) => {
+        return x.cardCode === card_raw.code
+    })
+
+    const card = {
+        code: card_raw.code,
+        count: card_raw.count,
+        rarity: null,
+        type: null,
+        regions: null,
+        attack: null,
+        cost: null,
+        health: null,
+        description: null,
+        name: null,
+        keywords: null,
+        spellSpeed: null,
+        subtypes: null,
+        supertype: null,
+        assets: null
+    }
+    if(card_json_raw){
+        card.rarity = card_json_raw.rarity.toLowerCase()
+        card.type = card_json_raw.type.map(x => x.toLowerCase())
+        card.regions = card_json_raw.regions
+        card.attack = card_json_raw.attack
+        card.cost = card_json_raw.cost
+        card.health = card_json_raw.health
+        card.description = card_json_raw.description
+        card.name = card_json_raw.name
+        card.keywords = card_json_raw.keywords
+        card.spellSpeed = card_json_raw.spellSpeed
+        card.subtypes = card_json_raw.subtypes
+        card.supertype = card_json_raw.supertype
+        card.assets = card_json_raw.assets
+
+    } else {
+        console.log("Card not found in json")
+        console.log(card_raw)
+    }
+
+    return card
+}
 const formatDeck = (deck_code) => {
     const cards = []
     const cards_raw = DeckEncoder.decode(deck_code)
@@ -133,29 +167,9 @@ const formatDeck = (deck_code) => {
         equipments: []
     }
     for(const card_raw of cards_raw){
-        const card_json_raw = card_json.find((x) => {
-            return x.cardCode === card_raw.code
-        })
-
-        const card = {
-            code: card_raw.code,
-            count: card_raw.count,
-            rarity: null,
-            type: null
-        }
-        if(card_json_raw){
-            card.rarity = card_json_raw.rarity.toLowerCase()
-            card.type = card_json_raw.type.toLowerCase()
-
-        } else {
-            console.log("Card not found in json")
-            console.log(card_raw)
-        }
-
+        const card = formatCard(card_raw)
         cards.push(card)
-        // console.log(card_raw)
-        // console.log(card)
-        // console.log(card_json_raw)
+
         if(card.rarity === "common"){
             deck.common += card_raw.count
         }
@@ -168,13 +182,15 @@ const formatDeck = (deck_code) => {
         if(card.rarity === "champion"){
             deck.champion += card_raw.count
         }
-        if(card.type === "spell"){
+        if(card.type.includes("spell")){
             deck.spells.push(card)
-        }
-        if(card.type === "unit" && card.rarity === "champion"){
+        } else if(card.type.includes("equipment")){
+            deck.equipments.push(card)
+        } else if(card.type.includes("landmark")){
+            deck.equipments.push(card)
+        } else if(card.type.includes("unit") && card.rarity === "champion"){
             deck.champions.push(card)
-        }
-        if(card.type === "unit" && card.rarity !== "champion"){
+        } else if(card.type.includes("unit") && card.rarity !== "champion"){
             deck.followers.push(card)
         }
     }
@@ -182,29 +198,27 @@ const formatDeck = (deck_code) => {
 
     return deck
 }
+// const getChampionImageSrc = () => {
+//     return ""
+//     // const base_url = "https://dd.b.pvp.net/4_4_0"
+//     // return `${base_url}/${set}/en_us/img/cards/${card_code}.png`
+// }
+
+const champions = ref([])
+const testChampions = () => {
+    const champions = []
+    for(const card of card_json){
+        if(card.rarity.toLowerCase() === "champion"){
+            champions.push(card.assets.gameAbsolutePath)
+        }
+    }
+    return champions
+}
 
 // ##########################################################
 
 onMounted(() => {
-    // console.log(props.match)
-    // console.log(card_json);
-    // console.log(opponent.value)
-    // console.log(props.match)
-    console.log(props.player_riot_id)
-    if(opponent.value){
-        riot_api.account.getByPUUID({
-            region: Platform.AMERICAS,
-            puuid: opponent.value.puuid
-        })
-            .then(account => {
-                console.log(account)
-                opponent_riot_id.value = {
-                    gameName: account.gameName,
-                    tagLine: account.tagLine,
-                    puuid: account.puuid
-                }
-            })
-    }
+    champions.value = testChampions()
 })
 
 // ##########################################################
@@ -233,9 +247,21 @@ onMounted(() => {
                             :src="getFactionImage(faction)"
                         >
                     </div>
-                    <div class="name">
-                        {{ player_riot_id.gameName }} #{{ player_riot_id.tagLine }}
+                    <div class="champions">
+                        <div
+                            class="champion-wrapper"
+                            v-for="(champion, idx) in player_deck.champions"
+                            :key="idx"
+                        >
+                            <img
+                                class="champion"
+                                :src="champion.assets[0].gameAbsolutePath"
+                            >
+                        </div>
                     </div>
+<!--                    <div class="name">-->
+<!--                        {{ player.gameName }} #{{ player.tagLine }}-->
+<!--                    </div>-->
                 </div>
                 <div class="participant opponent">
                     <div class="factions">
@@ -246,9 +272,21 @@ onMounted(() => {
                             :src="getFactionImage(faction)"
                         >
                     </div>
+                    <div class="champions">
+                        <div
+                            class="champion-wrapper"
+                            v-for="(champion, idx) in opponent_deck.champions"
+                            :key="idx"
+                        >
+                            <img
+                                class="champion"
+                                :src="champion.assets[0].gameAbsolutePath"
+                            >
+                        </div>
+                    </div>
                     <div class="name">
-                        <div v-if="opponent_riot_id">
-                            {{ opponent_riot_id?.gameName }} #{{ opponent_riot_id?.tagLine }}
+                        <div v-if="opponent">
+                            {{ opponent.gameName }} #{{ opponent.tagLine }}
                         </div>
                     </div>
                 </div>
@@ -260,6 +298,11 @@ onMounted(() => {
 
             <br><br>
             {{ opponent_deck }}
+
+
+            <div v-for="(champion, idx) in champions" :key="idx">
+                <img :src="champion">
+            </div>
         </div>
     </div>
 </template>
@@ -307,30 +350,59 @@ onMounted(() => {
 }
 
 .deck__info .participant{
-    display: flex;
     align-items: center;
     margin: .5rem .75rem;
-    height: 3rem;
+    /*height: 3rem;*/
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: 3.25rem 5rem auto;
 }
 
 .deck__info .participant .factions{
     display: flex;
     flex-direction: row;
-    gap: .35rem;
+    gap: .25rem;
 }
 .deck__info .participant .factions .faction{
     width: 1.5rem;
     height: 1.5rem;
+    align-items: flex-start;
+}
+
+.deck__info .participant .champions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .25rem;
+    align-content: center;
+    justify-content: center;
+}
+
+.deck__info .participant .champions .champion-wrapper{
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid transparent;
+    padding: 0;
+    align-self: center;
+    justify-self: center;
+}
+
+.deck__info .participant .champions .champion-wrapper .champion{
+    width: 4.25rem;
+    height: 6.4rem;
+    margin-left: -20px;
+    margin-top: -.5rem;
+    vertical-align: middle;
 }
 
 .deck__info .participant .name {
     font-size: .875rem;
     font-weight: bold;
+    text-align: left;
 }
 
 .participant{
-    display: grid;
-    gap: .5rem;
-    grid-template-columns: 3rem 8rem auto;
+
 }
 </style>

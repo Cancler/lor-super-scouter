@@ -1,4 +1,4 @@
-import {app, protocol, BrowserWindow, ipcMain} from 'electron';
+import {app, protocol, BrowserWindow, ipcMain, Menu} from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
 import Store from "electron-store"
@@ -24,7 +24,7 @@ async function createWindow() {
         width: 1600,
         height: 900,
         useContentSize: true,
-        autoHideMenuBar: true,
+        // autoHideMenuBar: true,
         frame: true,
         webPreferences: {
             sandbox: false,
@@ -72,65 +72,65 @@ app.on('ready', async () => {
             console.error('Vue Devtools failed to install:', e.toString());
         }
     }
-    // const template = [
-    //     {
-    //         label: 'File',
-    //         submenu: [
-    //             { role: 'quit' }
-    //         ]
-    //     },
-    //     {
-    //         label: 'Edit',
-    //         submenu: [
-    //             { role: 'undo' },
-    //             { role: 'redo' },
-    //             { type: 'separator' },
-    //             { role: 'cut' },
-    //             { role: 'copy' },
-    //             { role: 'paste' },
-    //             { role: 'delete' },
-    //             { type: 'separator' },
-    //             { role: 'selectAll' }
-    //         ]
-    //     },
-    //     {
-    //         label: 'View',
-    //         submenu: [
-    //             { role: 'reload' },
-    //             { role: 'forceReload' },
-    //             { role: 'toggleDevTools' },
-    //             { type: 'separator' },
-    //             { role: 'resetZoom' },
-    //             { role: 'zoomIn' },
-    //             { role: 'zoomOut' },
-    //             { type: 'separator' },
-    //             { role: 'togglefullscreen' }
-    //         ]
-    //     },
-    //     {
-    //         label: 'Window',
-    //         submenu: [
-    //             { role: 'minimize' },
-    //             { role: 'zoom' },
-    //             { role: 'close' }
-    //         ]
-    //     },
-    //     {
-    //         role: 'help',
-    //         submenu: [
-    //             {
-    //                 label: 'Learn More',
-    //                 click: async () => {
-    //                     const { shell } = require('electron')
-    //                     await shell.openExternal('https://www.google.com')
-    //                 }
-    //             }
-    //         ]
-    //     }
-    // ];
-    //
-    // const menu = Menu.buildFromTemplate(template)
-    // Menu.setApplicationMenu(menu)
+    const template = [
+        {
+            label: 'File',
+            submenu: [
+                { role: 'quit' }
+            ]
+        },
+        {
+            label: 'Edit',
+            submenu: [
+                { role: 'undo' },
+                { role: 'redo' },
+                { type: 'separator' },
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                { role: 'delete' },
+                { type: 'separator' },
+                { role: 'selectAll' }
+            ]
+        },
+        {
+            label: 'View',
+            submenu: [
+                { role: 'reload' },
+                { role: 'forceReload' },
+                { role: 'toggleDevTools' },
+                { type: 'separator' },
+                { role: 'resetZoom' },
+                { role: 'zoomIn' },
+                { role: 'zoomOut' },
+                { type: 'separator' },
+                { role: 'togglefullscreen' }
+            ]
+        },
+        {
+            label: 'Window',
+            submenu: [
+                { role: 'minimize' },
+                { role: 'zoom' },
+                { role: 'close' }
+            ]
+        },
+        {
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Learn More',
+                    click: async () => {
+                        const { shell } = require('electron')
+                        await shell.openExternal('https://www.google.com')
+                    }
+                }
+            ]
+        }
+    ];
+
+    const menu = Menu.buildFromTemplate(template)
+    Menu.setApplicationMenu(menu)
 
     createWindow();
 });
