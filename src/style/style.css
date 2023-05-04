@@ -47,3 +47,22 @@ body {
     /*min-width: 320px;*/
     min-height: 100vh;
 }
+
+:root::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+:root::-webkit-scrollbar:vertical {
+    width: 11px;
+}
+:root::-webkit-scrollbar:horizontal {
+    height: 11px;
+}
+:root::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid #6c757d; /* should match background, can't be transparent */
+    background-color: #6c757d;
+}
+:root::-webkit-scrollbar-track {
+    background-color: #222;
+    border-radius: 8px;
+} 
