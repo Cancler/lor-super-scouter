@@ -12,6 +12,18 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+
+    --bandlecity-bg: linear-gradient(90deg,rgb(193,207,17) 30%,rgba(193,207,17,0) 70%);
+    --bilgewater-bg: linear-gradient(90deg,rgb(209,109,73) 30%,rgba(209,109,73,0) 70%);
+    --demacia-bg: linear-gradient(90deg,rgb(231,217,184) 30%,rgba(231,217,184,0) 70%);
+    --freljord-bg: linear-gradient(90deg,rgb(147,223,250) 30%,rgba(147,223,250,0) 70%);;
+    --ionia-bg: linear-gradient(90deg,rgb(207,130,155) 30%,rgba(207,130,155,0) 70%);
+    --mttargon-bg: linear-gradient(90deg,rgb(91,55,229) 30%,rgba(91,55,229,0) 70%);
+    --noxus-bg: linear-gradient(90deg,rgb(200,77,74) 30%,rgba(200,77,74,0) 70%);
+    --piltover-bg: linear-gradient(90deg,rgb(222,199,69) 30%,rgba(222,199,69,0) 70%);
+    --runeterra-bg: linear-gradient(90deg,rgb(171 148 89) 30%,rgba(91,55,229,0) 70%);
+    --shadowisles-bg: linear-gradient(90deg,rgb(12,161,132) 30%,rgba(12,161,132,0) 70%);
+    --shurima-bg: linear-gradient(90deg,rgb(238,205,50) 30%,rgba(238,205,50,0) 70%);
 }
 *, ::before ::after {
     box-sizing: unset!important;
@@ -65,4 +77,4 @@ body {
 :root::-webkit-scrollbar-track {
     background-color: #222;
     border-radius: 8px;
-} 
+}

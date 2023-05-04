@@ -110,11 +110,10 @@ const getFactionImage = (faction) => {
         return require("@/assets/factions/icon-runeterra.png")
     }
 }
-const formatCard = (card_raw) => {
+const formatCard = (card_raw, factions) => {
     const card_json_raw = card_json.find((x) => {
         return x.cardCode === card_raw.code
     })
-
     const card = {
         code: card_raw.code,
         count: card_raw.count,
@@ -131,7 +130,12 @@ const formatCard = (card_raw) => {
         subtypes: null,
         supertype: null,
         assets: null,
-        formats: null
+        formats: null,
+        is_faction: null,
+        margin: {
+            left: 65,
+            top: -110
+        }
     }
     if(card_json_raw){
         card.rarity = card_json_raw.rarity.toLowerCase()
@@ -148,10 +152,19 @@ const formatCard = (card_raw) => {
         card.supertype = card_json_raw.supertype
         card.assets = card_json_raw.assets
         card.formats = card_json_raw.formats
-
+        // card.margin = card_json_raw.margin
     } else {
         console.log("Card not found in json")
         console.log(card_raw)
+    }
+
+    for(const faction of factions){
+        if(card.regions){
+            const is_faction = isFactionInRegions(card.regions, faction)
+            if(is_faction){
+                card.is_faction = is_faction
+            }
+        }
     }
 
     return card
@@ -160,11 +173,11 @@ const isFactionInRegions = (regions, faction) =>{
     for(const region of regions){
         const _region = region.split("&")[0].split(" ").join("")
         if (_region.toLowerCase() === faction.toLowerCase()){
-            return true
+            return _region.toLowerCase()
         }
     }
 
-    return false
+    return ""
 }
 const getFactionCount = (faction, deck) => {
     let count = 0
@@ -210,6 +223,22 @@ const getFactionCount = (faction, deck) => {
 
     return [count, not_in]
 }
+const sort = (array) => {
+    array.sort((a, b) => {
+        if(a.name < b.name){
+            return -1;
+        }
+        if(a.name > b.name){
+            return 1;
+        }
+
+        return 0;
+    })
+
+    array.sort((a, b) => a.cost - b.cost)
+
+    return array
+}
 const formatDeck = (deck_code, factions) => {
     const cards = []
     const cards_raw = DeckEncoder.decode(deck_code)
@@ -226,8 +255,10 @@ const formatDeck = (deck_code, factions) => {
         formats: [],
         factions: []
     }
+
     for(const card_raw of cards_raw){
-        const card = formatCard(card_raw)
+        const card = formatCard(card_raw, factions)
+
         cards.push(card)
         if(card.rarity === "common"){
             deck.common += card_raw.count
@@ -252,23 +283,25 @@ const formatDeck = (deck_code, factions) => {
         } else if(card.type.includes("unit") && card.rarity !== "champion"){
             deck.followers.push(card)
         }
-
         for(const format of card.formats){
             if(!deck.formats.includes(format)){
                 deck.formats.push(format)
             }
         }
     }
-    console.log(deck)
 
     for(const faction of factions){
         const [count, not_in] = getFactionCount(faction, deck)
-
         deck.factions.push({
             name: faction,
             count: (count > 0) ? count : not_in
         })
     }
+    deck.spells = sort(deck.spells)
+    deck.landmarks = sort(deck.landmarks)
+    deck.equipments = sort(deck.equipments)
+    deck.champions = sort(deck.champions)
+    deck.followers = sort(deck.followers)
 
     return deck
 }
@@ -280,7 +313,7 @@ const formatDeck = (deck_code, factions) => {
         <div class="info-wrapper" @click="show_deck=!show_deck">
             <div class="game__info">
                 <div class="queue-type">
-                    {{ match?.info.game_mode }}
+                    {{ match?.info.game_type }}
                 </div>
                 <div class="game-start-time">
                     {{ date }}
@@ -320,7 +353,7 @@ const formatDeck = (deck_code, factions) => {
                     </div>
                 </div>
                 <div class="vs">vs.</div>
-                <div class="participant opponent">
+                <div class="participant opponent" v-if="opponent">
                     <div class="factions">
                         <img
                             class="faction"
@@ -350,6 +383,11 @@ const formatDeck = (deck_code, factions) => {
                         <div v-if="opponent">
                             {{ opponent.gameName }} #{{ opponent.tagLine }}
                         </div>
+                    </div>
+                </div>
+                <div v-else class="participant opponent">
+                    <div class="name">
+                        AI
                     </div>
                 </div>
             </div>
